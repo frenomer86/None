@@ -1,0 +1,60 @@
+seed: 42
+experiment_name: nslkdd_full
+paths:
+  raw_csv: data/nslkdd/extracted/NSL_KDD-master/KDDTrain+.txt
+  data_root: data
+  output_root: outputs
+dataset:
+  name: nslkdd
+  auto_download: true
+  delimiter: ","
+  has_header: false
+  column_names: [duration, protocol_type, service, flag, src_bytes, dst_bytes, land, wrong_fragment, urgent, hot, num_failed_logins, logged_in, num_compromised, root_shell, su_attempted, num_root, num_file_creations, num_shells, num_access_files, num_outbound_cmds, is_host_login, is_guest_login, count, srv_count, serror_rate, srv_serror_rate, rerror_rate, srv_rerror_rate, same_srv_rate, diff_srv_rate, srv_diff_host_rate, dst_host_count, dst_host_srv_count, dst_host_same_srv_rate, dst_host_diff_srv_rate, dst_host_same_src_port_rate, dst_host_srv_diff_host_rate, dst_host_serror_rate, dst_host_srv_serror_rate, dst_host_rerror_rate, dst_host_srv_rerror_rate, label, difficulty]
+  label_col: label
+  timestamp_col: null
+  positive_regex: "^(?!normal).*"
+  drop_columns: [difficulty]
+  max_rows: null
+features:
+  packet_count_col: src_bytes
+  flow_duration_col: duration
+  bytes_col: dst_bytes
+  iat_mean_col: null
+preprocessing:
+  clip_iqr: true
+  normalize: minmax
+  train_ratio: 0.7
+  val_ratio: 0.15
+model:
+  input_dim: null
+  hidden_dim: 256
+  latent_dim: 128
+  rnn_layers: 2
+  dropout: 0.2
+  aggr: mean
+training:
+  batch_size: 256
+  epochs: 30
+  lr: 0.0001
+  weight_decay: 0.00001
+  kl_weight: 0.1
+  agil_weight: 0.5
+  adv_steps: 5
+  adv_eps: 0.05
+  grad_clip: 5.0
+  early_stopping_patience: 7
+online_transfer:
+  enabled: true
+  window_len: 500
+  update_lr: 0.00005
+  replay_weight: 0.5
+evaluation:
+  threshold: 0.5
+  few_shot_ns: [1, 3, 5, 10]
+  few_shot_repeats: 10
+  save_confusion: true
+ablations:
+  - full
+  - no_dart
+  - no_agil
+  - no_online_tl
